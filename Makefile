@@ -24,4 +24,4 @@ startup.o:startup.c
 re: clean all
 
 clean:
-	rm -f *.o *.elf
+	rm -f *.o *.elf result.map

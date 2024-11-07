@@ -217,8 +217,32 @@ uint32_t vector_table[] __attribute__((section (".cs_vectors"))) = {
   (uint32_t) fmp_i2c1_err_isr
 };
 
+extern uint32_t _start_of_text;
+extern uint32_t _end_of_text;
+extern uint32_t _start_of_data;
+extern uint32_t _end_of_data;
+extern uint32_t _start_of_bss;
+extern uint32_t _end_of_bss;
+
+extern void	system_start(void);
 void reset_vector(void)
 {
+  const uint32_t data_section_size = &_end_of_data - &_start_of_data;
+  uint32_t* data_section_dst_on_sram_ptr = (uint32_t*)&_start_of_data;
+  const uint32_t* where_to_start_copy_from_ptr = (uint32_t*)&_end_of_text;
+
+  for (uint32_t i = 0; i < data_section_size; ++i) {
+    data_section_dst_on_sram_ptr[i] = where_to_start_copy_from_ptr[i];
+  }
+
+  const uint32_t bss_size = &_end_of_bss - &_start_of_bss;
+  uint32_t* bss_dst = (uint32_t*)&_start_of_bss;
+  for (uint32_t i = 0; i < bss_size; ++i)
+  {
+    bss_dst[i] = 0;
+  }
+
+  system_start();
 }
 
 void blocking_handler(void)
